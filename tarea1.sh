@@ -38,7 +38,7 @@ function create_dir() {
     local is_valid=0
     echo -e "################# Crear mi directorio ###################\n"
     while [ $is_valid -ne 1 ]; do
-        read -p '-> Ingrese el nombre del directorio: ' dir
+        read -p '=> Ingrese el nombre del directorio: ' dir
         if [[ $dir =~ ^[a-zA-Z0-9_.-]*$ ]]; then
             if [ -a $dir ]; then
                 echo -e "\nEl directorio $dir ya existe, favor introducir un nombre diferente\n"
@@ -57,7 +57,7 @@ function create_file() {
     local is_valid=0
     echo -e "################# Crear mi archivo ###################\n"
     while [ $is_valid -ne 1 ]; do
-        read -p '-> Ingrese el nombre del archivo: ' file
+        read -p '=> Ingrese el nombre del archivo: ' file
         if [[ $file =~ ^[a-zA-Z0-9_.-]*$ ]]; then
             if [ -f $file ]; then
                 echo -e "\nEl archivo $file ya existe, favor introducir un nombre diferente\n"
@@ -65,7 +65,7 @@ function create_file() {
                 touch $file
                 echo -e "Archivo antes de agregar linea\n-----------------\n"
                 cat $file
-                read -p "->Ingrese el texto de para el archivo $file: " line
+                read -p "=>Ingrese el texto de para el archivo $file: " line
                 echo "$line" >> $file
                 echo -e "Archivo despues de agregar linea\n-----------------\n"
                 cat $file
@@ -113,11 +113,11 @@ function give_permissions() {
     echo -e "################# Brindar permisos ###################\n"
     option=0
     while [ $option -ne 8 ]; do
-        read -p '-> Ingrese el nombre del archivo o directorio al cual se brindarán los permisos: ' name
+        read -p '=> Ingrese el nombre del archivo o directorio al cual se brindarán los permisos: ' name
         if [[ $file =~ ^[\\/a-zA-Z0-9_.-]*$ ]]; then
             if [ -f $name ]; then
                 permissions_menu
-                read -p "-> Ingrese el tipo de permisos a asignar al archivo: " option
+                read -p "=> Ingrese el tipo de permisos a asignar al archivo: " option
                 if [ $option -ne 8 ]; then
                     echo -e "Permisos del archivo antes de cambiarlos"
                     echo `ls -l $name`
@@ -129,7 +129,7 @@ function give_permissions() {
             elif [ -a $name ]; then
                 permissions_menu
                 if [ $option -ne 8 ]; then
-                    read -p "-> Ingrese el tipo de permisos a asignar al archivo: " option
+                    read -p "=> Ingrese el tipo de permisos a asignar al archivo: " option
                     echo -e "Permisos del archivo antes de cambiarlos"
                     echo `ls -ld $name`
                     set_permissions "$option" "$name"
@@ -151,7 +151,7 @@ function list_dirs_and_files_by_route() {
     local is_valid=0
     echo -e "################# Listar mi directorio ###################\n"
     while [ $is_valid -ne 1 ]; do
-        read -p '-> Ingrese el nombre del directorio: ' dir
+        read -p '=> Ingrese el nombre del directorio: ' dir
         if [[ $dir =~ ^[\\/a-zA-Z0-9_.-]*$ ]]; then
             check_dir=$(dir_exists $dir)
             if [ $check_dir = 'y' ]; then
@@ -179,7 +179,7 @@ function compression_menu() {
 
 function do_compress() {
     echo -e "\n"
-    read -p "-> Ingrese el nombre que le asignará al comprimido: " filename
+    read -p "=> Ingrese el nombre que le asignará al comprimido: " filename
     if [ $1 -eq 1 ]; then
         # zip compression
         compress=`zip -r $3/$filename.zip $2`
@@ -187,54 +187,128 @@ function do_compress() {
     elif [ $1 -eq 2 ]; then
         # tar compression
         compress=`tar -cvf $3/$filename.tar $2`
-        echo -e "\nEl directorio $2 se comprimió en $3/$filename.zip"
+        echo -e "\nEl directorio $2 se comprimió en $3/$filename.tar"
     fi
 }
 
-function compress_files() {
+function do_uncompress() {
+    check_valid='n'
+    echo -e "\n"
+    read -p "=> Ingrese el nombre del comprimido (incluida su extension): " filename
+    check_file=$(file_exists $1/$filename)
+    if [ $check_file = 'y' ]; then
+        if [[ $filename =~ ^.*\.(zip)$ ]]; then
+            check_valid='y'
+            echo "$check_valid"
+        elif [[ $filename =~ ^.*\.(tar)$ ]]; then
+            uncompress=`tar -xvf $1/$filename -C $2`
+            check_valid='y'
+            echo "$check_valid"
+        else
+            check_valid='i'
+            echo "$check_valid"
+        fi
+    elif [ $check_file = 'n' ]; then
+        check_valid='n'
+        echo "$check_valid"
+    fi
+}
+
+function compress_and_uncompress_files() {
     local is_valid=0
     echo -e "################# Comprimir mi directorio ###################\n"
+    echo 'Menu:'
+    echo '(1). Comprimir archivos'
+    echo '(2). Descomprimir archivos'
+    read -p '=> Ingrese su opcion: ' menu_option
     while [ $is_valid -ne 1 ]; do
-        # Solicitando directorio origen
-        read -p '-> Ingrese el nombre del directorio a comprimir: ' org_dir
-        # validando rura
-        if [[ $org_dir =~ ^[\\/a-zA-Z0-9_.-]*$ ]]; then
-            check_dir=$(dir_exists $org_dir)
-            if [ $check_dir = 'y' ]; then
-                # Solicitando directorio destino
-                echo -e "\n"
-                read -p "-> Ingrese la ruta en donde se almacenará el comprimido, si desea guardar el comprimido en la misma carpeta escriba 'origen': " dest_dir
-                # comprimir en carpeta origen
-                if [ $dest_dir = 'origen' ]; then
-                    compression_menu    
-                    read -p '-> Ingrese su opción: ' option
-                    echo $option
-                    result="$(do_compress $option $org_dir $org_dir)"
-                    clear
-                    echo $result
-                    is_valid=1
-                    # comprimir en otra ruta 
-                elif [[ $dest_dir =~ ^[\\/a-zA-Z0-9_.-]*$ ]]; then
-                    check_dir=$(dir_exists $dest_dir)
-                    if [ $check_dir = 'y' ]; then
+        if [ $menu_option -eq 1 ]; then
+            # Solicitando directorio origen
+            read -p '=> Ingrese el nombre del directorio a comprimir: ' org_dir
+            # validando rura
+            if [[ $org_dir =~ ^[\\/a-zA-Z0-9_.-]*$ ]]; then
+                check_dir=$(dir_exists $org_dir)
+                if [ $check_dir = 'y' ]; then
+                    # Solicitando directorio destino
+                    echo -e "\n"
+                    read -p "=> Ingrese la ruta en donde se almacenará el comprimido, si desea guardar el comprimido en la misma carpeta escriba 'origen': " dest_dir
+                    # comprimir en carpeta origen
+                    if [ $dest_dir = 'origen' ]; then
                         compression_menu    
-                        read -p '-> Ingrese su opción: ' option
-                        echo $option
-                        result="$(do_compress $option $org_dir $dest_dir)"
+                        read -p '=> Ingrese su opción: ' option
+                        result="$(do_compress $option $org_dir $org_dir)"
                         clear
                         echo $result
                         is_valid=1
-                    elif [ $check_dir = 'n' ]; then
-                        echo -e "\nEl directorio destino $dest_dir no existe, favor verificar la ruta"
+                        # comprimir en otra ruta 
+                    elif [[ $dest_dir =~ ^[\\/a-zA-Z0-9_.-]*$ ]]; then
+                        check_dir=$(dir_exists $dest_dir)
+                        if [ $check_dir = 'y' ]; then
+                            compression_menu    
+                            read -p '=> Ingrese su opción: ' option
+                            result="$(do_compress $option $org_dir $dest_dir)"
+                            clear
+                            echo $result
+                            is_valid=1
+                        elif [ $check_dir = 'n' ]; then
+                            echo -e "\nEl directorio destino $dest_dir no existe, favor verificar la ruta"
+                        fi
+                    else
+                        echo -e "\nIngresar un nombre de directorio valido\n"
                     fi
-                else
-                    echo -e "\nIngresar un nombre de archivo o directorio valido\n"
+                elif [ $check_dir = 'n' ]; then
+                    echo -e "\nEl directorio origen $org_dir no existe, favor verificar la ruta"
                 fi
-            elif [ $check_dir = 'n' ]; then
-                echo -e "\nEl directorio origen $org_dir no existe, favor verificar la ruta"
+            else
+                echo -e "\nIngresar un nombre de directorio valido\n"
             fi
-        else
-            echo -e "\nIngresar un nombre de archivo o directorio valido\n"
+            # fin comprimir
+            # inicio descomprimir
+        elif [ $menu_option -eq 2 ]; then
+            read -p '=> Ingrese la ruta del directorio en donde se encuentra el comprimido: ' org_dir
+            # validando rura
+            if [[ $org_dir =~ ^[\\/a-zA-Z0-9_.-]*$ ]]; then
+                check_dir=$(dir_exists $org_dir)
+                if [ $check_dir = 'y' ]; then
+                    # Solicitando directorio destino
+                    echo -e "\n"
+                    read -p "=> Ingrese la ruta en donde se almacenarán los archivos descomprimidos, si desea guardar los archivos decomprimidos en la misma carpeta escriba 'origen': " dest_dir
+                    # comprimir en carpeta origen
+                    if [ $dest_dir = 'origen' ]; then
+                        did_uncompress=$(do_uncompress $org_dir $org_dir)
+                        if [ $did_uncompress = 'y' ]; then
+                            is_valid=1
+                            echo -e "\nEl archivo comprimido se descomprimió correctamente en: $org_dir\n"
+                        elif [ $did_uncompress = 'i' ]; then
+                            echo 'Extensión de archivo inválida'
+                        elif [ $did_uncompress = 'n' ]; then
+                            echo 'El archivo no existe'
+                        fi
+                        # comprimir en otra ruta 
+                    elif [[ $dest_dir =~ ^[\\/a-zA-Z0-9_.-]*$ ]]; then
+                        check_dir=$(dir_exists $dest_dir)
+                        if [ $check_dir = 'y' ]; then
+                            did_uncompress=$(do_uncompress $org_dir $dest_dir)
+                            if [ $did_uncompress = 'y' ]; then
+                                is_valid=1
+                            echo -e "\nEl archivo comprimido se descomprimió correctamente en: $dest_dir\n"
+                            elif [ $did_uncompress = 'i' ]; then
+                                echo 'Extensión de archivo inválida'
+                            elif [ $did_uncompress = 'n' ]; then
+                                echo 'El archivo no existe'
+                            fi
+                        elif [ $check_dir = 'n' ]; then
+                            echo -e "\nEl directorio destino $dest_dir no existe, favor verificar la ruta"
+                        fi
+                    else
+                        echo -e "\nIngresar un nombre de directorio valido\n"
+                    fi
+                elif [ $check_dir = 'n' ]; then
+                    echo -e "\nEl directorio origen $org_dir no existe, favor verificar la ruta"
+                fi
+            else
+                echo -e "\nIngresar un nombre de directorio valido\n"
+            fi
         fi
     done
 }
@@ -243,34 +317,38 @@ function compress_files() {
 # dir_exists "a"
 # file_exists "a/c.txt"
 
-menu_condition='s'
+function main(){
+    menu_condition='s'
 
-while [ $menu_condition != 'n' ]; do
-    show_menu
-    read -p '-> Ingrese su opcion: ' option
-    case $option in
-        1)
-            clear
-            create_dir;;
-        2)
-            clear
-            create_file;;
-        3)
-            clear
-            give_permissions;;
-        4)
-            clear
-            list_dirs_and_files_by_route;;
-        5)
-            clear
-            compress_files;;
-        6)
-            clear
-            menu_condition='n';;
-    esac
-    if [ $option -ne 6 ]; then
-        read -p '-> Desea realizar otra operacion? (s)i (n)o: ' menu_condition
-        echo -e "\n"
-    fi
-    clear
-done
+    while [ $menu_condition != 'n' ]; do
+        show_menu
+        read -p '=> Ingrese su opcion: ' option
+        case $option in
+            1)
+                clear
+                create_dir;;
+            2)
+                clear
+                create_file;;
+            3)
+                clear
+                give_permissions;;
+            4)
+                clear
+                list_dirs_and_files_by_route;;
+            5)
+                clear
+                compress_and_uncompress_files;;
+            6)
+                clear
+                menu_condition='n';;
+        esac
+        if [ $option -ne 6 ]; then
+            read -p '=> Desea realizar otra operacion? (s)i (n)o: ' menu_condition
+            echo -e "\n"
+        fi
+        clear
+    done
+}
+
+main

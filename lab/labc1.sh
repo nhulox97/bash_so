@@ -10,8 +10,24 @@ function menu() {
     echo '(4). Salir'
 }
 
+function dir_exists() {
+    local result=''
+    if [ -a $1 ]; then
+        result='y'
+        echo "$result" 
+    else
+        result='n'
+        echo "$result" 
+    fi
+}
+
 function add_user() {
-    echo 'Add user'
+    read -p 'Ingrese el nombre del usuario: ' user 
+    read -p 'Ingrese la contraseña del usuario: ' password
+    exec_user=`sudo useradd -p $password -m $user`
+    # Verificamos si el usario se creo a travez de validar si el directorio
+    # /home/$user existe
+       
 } 
 
 function give_permissions() {
@@ -19,7 +35,8 @@ function give_permissions() {
 }
 
 function kill_process() {
-    echo 'Kill process'
+    read 'Ingrese el nombre del usuario: ' user 
+    sudo adduser $user
 }
 
 function main() {
@@ -43,10 +60,10 @@ function main() {
                 main_option='n';;
         esac
         if [ $option -ne 4 ]; then
-            read -p '=> Desea realizar otra operacion? (s)i (n)o: ' menu_condition
+            read -p '=> Desea realizar otra operacion? (s)i (n)o: ' main_option
             echo -e "\n"
         fi
         clear
     done
 }
- main
+main

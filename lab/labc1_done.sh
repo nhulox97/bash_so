@@ -142,7 +142,7 @@ function give_permissions() {
 
     case $option in 
         1) 
-            echo 'Permisos con letras';;
+            permit_letters;;
         2)
             give_permissions_with_numbers;;
         *)
@@ -184,3 +184,4 @@ function main() {
     done
 }
 main
+

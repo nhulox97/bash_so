@@ -27,7 +27,12 @@ function add_user() {
     exec_user=`sudo useradd -p $password -m $user`
     # Verificamos si el usario se creo a travez de validar si el directorio
     # /home/$user existe
-       
+    check_dir=$(dir_exists /home/$user)
+    if [ $check_dir = 'y' ]; then
+        echo 'El usuario se creó correctamente.'
+    else
+        echo 'Error al crear.'
+    fi    
 } 
 
 function give_permissions() {

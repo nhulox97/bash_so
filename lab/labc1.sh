@@ -152,8 +152,32 @@ function give_permissions() {
 }
 
 function kill_process() {
-    read 'Ingrese el nombre del usuario: ' user 
-    sudo adduser $user
+    local proc='n'
+    echo '################### Matar un proceso ###################'
+    while [ $proc != 's' ]; do
+        read -p 'Ingrese el nombre del proceso: ' proc_name
+        if pgrep -x "$proc_name">/dev/null 
+        then
+            ps aux | grep $proc_name
+            echo -e "\nIngrese el pid del proceso que desea matar: "
+            read -p '> ' proc_id
+            echo -e "Proceso a matar: \n"
+            ps -Flww -p $proc_id
+            echo 'Esta seguro de matar el proceso $proc_name: (s)i (no)'
+            read -p '> ' proc_option
+            if [ $proc_option = 's' -o $proc_option = 'S' ]; then
+                kill -9 $proc_id
+                echo 'El proceso se mato correctamente'
+                proc='s'
+            else 
+                proc='s'
+            fi
+        else
+            echo -e "\nError: el proceso $proc_name no esta en ejecucion"
+            echo -e "Por favor ingresar el nombre de un proceso en ejecucion\n"
+            proc='n'
+        fi
+    done
 }
 
 function main() {

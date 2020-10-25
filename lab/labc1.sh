@@ -24,7 +24,7 @@ function dir_exists() {
 function add_user() {
     read -p 'Ingrese el nombre del usuario: ' user 
     read -p 'Ingrese la contraseña del usuario: ' password
-    exec_user=`sudo useradd -m -s /bin/bash -k -p $password $user`
+    exec_user=`sudo useradd -m -s /bin/bash -p $password $user`
     # Verificamos si el usario se creo a travez de validar si el directorio
     # /home/$user existe
     check_dir=$(dir_exists /home/$user)

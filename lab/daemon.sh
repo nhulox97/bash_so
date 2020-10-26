@@ -8,33 +8,35 @@
 # Default-Stop: 0 1 6
 # Description: My little daemon
 ### END INIT INFO
- 
+
 NAME=scriptdaemon
 DESC="Demonio de servicio"
 PIDFILE="/var/run/${NAME}.pid"
 LOGFILE="/var/log/${NAME}.log"
 
 #indicamos que vamos a ejecutar un archivo Python
-DAEMON="/bin/sh"
+DAEMON="/usr/bin/gnome-terminal"
 #Ruta del archivo
-DAEMON_OPTS="/home/ismaelo/Documents/UNIVO/Ciclo_8/SO/tareas/LAB/script.sh" # esta ruta debe cambiar segun lo hayan guardado
- 
-START_OPTS="--start --background --make-pidfile --pidfile ${PIDFILE} --exec ${DAEMON} ${DAEMON_OPTS}"
+DAEMON_OPTS="/home/nhulox97/Documents/CicloII2020/SistemasOperativos/Tareas/TareasBash/lab/labc1.sh" #esta ruta debe cambiar segun lo hayan guardado
+
+START_OPTS="--start --make-pidfile --pidfile ${PIDFILE} --exec ${DAEMON}"
 STOP_OPTS="--stop --pidfile ${PIDFILE}"
- 
+
 test -x $DAEMON || exit 0
- 
+
 set -e
- 
+
 case "$1" in
     start)
         echo -n "Starting ${DESC}: "
-        start-stop-daemon $START_OPTS >> $LOGFILE
+        gnome-terminal -e $DAEMON_OPTS --title="$NAME" & echo $! > $PIDFILE
         echo "$NAME."
         ;;
     stop)
         echo -n "Stopping $DESC: "
-        start-stop-daemon $STOP_OPTS
+        echo `cat $PIDFILE`
+        kill -9 `cat ${PIDFILE}`
+        # start-stop-daemon $STOP_OPTS
         echo "$NAME."
         rm -f $PIDFILE
         ;;
@@ -51,7 +53,7 @@ case "$1" in
         exit 1
         ;;
 esac
- 
+
 exit 0
 
 

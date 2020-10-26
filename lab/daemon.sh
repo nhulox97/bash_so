@@ -25,11 +25,11 @@ STOP_OPTS="--stop --pidfile ${PIDFILE}"
 test -x $DAEMON || exit 0
 
 set -e
-
+# Solo me funciona start, intente capturar el pid de la terminal recien abierta, pero al parecer ese pid es temporal puesto que al intentar detener obtengo una salida que indica que el proceso no existe/.
 case "$1" in
     start)
         echo -n "Starting ${DESC}: "
-        gnome-terminal -e $DAEMON_OPTS --title="$NAME" & echo $! > $PIDFILE
+        gnome-terminal -- $DAEMON_OPTS --title="$NAME" & echo $! > $PIDFILE
         echo "$NAME."
         ;;
     stop)

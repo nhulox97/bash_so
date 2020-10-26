@@ -156,8 +156,8 @@ function kill_process() {
     echo '################### Matar un proceso ###################'
     while [ $proc != 's' ]; do
         read -p 'Ingrese el nombre del proceso: ' proc_name
-        if pgrep -x "$proc_name">/dev/null 
-        then
+        proc_search=`ps hf -opid -C $proc_name | awk '{ print $1; exit }'`
+        if [ ! -z $proc_search ]; then
             ps aux | grep $proc_name
             echo -e "\nIngrese el pid del proceso que desea matar: "
             read -p '> ' proc_id

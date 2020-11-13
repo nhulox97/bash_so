@@ -1,0 +1,15 @@
+#$2 es la segunda columna, estas se separan 
+#a partir del patron especificado al momento de ejecutar este codigo
+{
+    if(!(toupper($2)  in preferencias)){
+        preferencias[toupper($2)]=i
+        i++
+    }
+}
+
+END{
+    for(preferencia in preferencias){
+        print preferencia
+    } 
+}
+

@@ -1,0 +1,10 @@
+[Unit]
+Description=My python server
+After=multi-user.target
+
+[Service]
+Type=idle
+ExecStart=/usr/bin/python /home/nhulox97/server/server.py > /home/nhulox97/server/serverpython.log 2>&1
+
+[Install]
+WantedBy=multi-user.target

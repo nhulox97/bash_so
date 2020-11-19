@@ -15,14 +15,19 @@ practica1() {
     read -p '=> Ingrese el asunto del mail: ' subject
     read -p '=> Ingrese el contenido del mail: ' content
     read -p '=> Desea adjuntar un archivo? (s)i, (n)o: ' need_file
-    if [ $need_file = 's' ]; then 
-        echo 'Necesita enviar'
-    elif [ $need_file = 'n' ]; then 
-        subject="$subject. usr: $usr, date: $current_date"
-        echo $content | mail -s "$subject" $receiver
-    else
-        echo 'Oopcion invalida'
-    fi 
+    file_option='s'
+    while [ $file_option = 's' ]; do
+        if [ $need_file = 's' ]; then 
+            echo 'Necesita enviar'
+            file_option='n'
+        elif [ $need_file = 'n' ]; then 
+            subject="$subject. usr: $usr, date: $current_date"
+            echo $content | mail -s "$subject" $receiver
+            file_option='n'
+        else
+            echo 'Opcion invalida'
+        fi 
+    done
 }
 
 main(){
@@ -40,6 +45,7 @@ main(){
                 menu_condition='n';;
         esac
         if [ $option -ne 2 ]; then
+            echo -e "\n############################################"
             read -p '=> Desea realizar otra operacion? (s)i (n)o: ' menu_condition
             echo -e "\n"
         fi

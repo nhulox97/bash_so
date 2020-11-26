@@ -118,4 +118,3 @@ main(){
     done
 }
  main
-#print_mail_whitout_files "test1" "test2" "test3"

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+current=`pwd`
+
 get_files(){
     # Obtengo todos los archivos con las extensiones requeridas
     files=`ls $HOME | awk '/^.*\.(odt|odp|sh|txt)$/{print $0}'`
@@ -10,14 +12,39 @@ get_files(){
     echo "$files"
 }
 
-# Obtenemos los archivos
-distros=get_files
+file_exists() {
+    local result=''
+    if [ -f $1 ]; then
+        result='y'
+        echo "$result" 
+    else
+        result='n'
+        echo "$result" 
+    fi
+}
+
+files=$(get_files)
 # Convertimos el output de la funcion en un array. Se hace bajo el formato:
 # ($cadena) "Notese que los archivos deben estar separados por un espacio"
-distros=($distros)
+# files=($files)
 # recorremos el array para comprobar que la cadena se convirtio en array, deberia imprimir
 # los resultados uno por linea
-for i in "${distros[@]}"
-do
-    echo $i
-done
+# for i in "${files[@]}"
+# do
+#    check_file=$(file_exists "$HOME/$i")
+#    if [ $check_file = 'y' ]; then
+#        echo 'Existe'
+#    else
+#        echo 'No existe'
+#    fi
+# done
+
+compress_files(){
+    array=($1)
+    for i in ${!array[@]}; do
+        array[$i]="../${array[$i]}"
+    done
+    cd $HOME/backups && tar -cvf test1.tar "${array[@]}" && cd $current
+}
+
+compress_files "$files"
